@@ -1,4 +1,6 @@
 var global_page = 1;
+var global_item = 0;
+var global_total = 0;
 var global_li_str = '';
 
 $(document).ready(function(){
@@ -9,8 +11,8 @@ function ShowItems(show_el){
 	var li_str='';
 	$(".loader").show(); //Показываем прелоадер
 	$("#show_more").attr('disabled',true);
-	
-	$.ajax({
+	if(global_item < global_total || global_total == 0){
+		$.ajax({
         url: "list.php",
         type: "GET",
         data: {"page": global_page, "per_page": 4},
@@ -25,12 +27,12 @@ function ShowItems(show_el){
 
 								
 				 response = JSON.parse(response);
-				if(response.entities.length == 0){
+				/*if(response.entities.length == 0){
 					$("#show_more").hide();
-				}
+				}*/
 								
 				for(var i=0;i<response.entities.length;i++){
-				
+					global_item++;
 					li_str+='<li class="catalog-item">'+
                     '<div class="img-item">'+
                         '<img src="'+response.entities[i].img+'" alt="'+response.entities[i].title+'"/>';
@@ -62,7 +64,7 @@ function ShowItems(show_el){
 
 
 				if(global_li_str =='' && show_el){
-						
+					global_total = response.total;
 					$(li_str).appendTo($(".catalog-list")).hide().show('slow');
 					global_page++;
 					ShowItems(false);
@@ -78,13 +80,18 @@ function ShowItems(show_el){
 						global_li_str=li_str;
 						global_page  ++;
 					}
-								
-                 
-                 
+
             }
 				$(".loader").hide();
 				$("#show_more").removeAttr('disabled');
         }
 
-    });
+    });		
+	}
+	else{
+				$("#show_more").hide();
+				$(".loader").hide();
+			$(global_li_str).appendTo($(".catalog-list")).hide().show('slow');
+	}
+
 }
